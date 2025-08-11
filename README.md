@@ -6,7 +6,7 @@ git clone https://github.com/HydraRecon/hydra-recon.git
 
 cd hydra-recon
 
-bash setup.sh
+./setup.sh
 
 # Run
 hydra-recon.sh example.com

@@ -9,4 +9,4 @@ cd hydra-recon
 ./setup.sh
 
 # Run
-hydra-recon.sh example.com
+./hydra-recon.sh example.com

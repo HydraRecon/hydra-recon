@@ -1,15 +1,19 @@
-cat > setup.sh <<'EOF'
-#!/usr/bin/env bash
-# setup helper - installs common tools used by hydra-recon
-set -e
-echo "[*] Installing prerequisites (apt)..."
-sudo apt update
-sudo apt install -y git curl wget jq build-essential golang-go
+#!/bin/bash
 
-export GOPATH=\${GOPATH:-\$HOME/go}
-export PATH=\$PATH:\$GOPATH/bin
+echo "[*] Installing HydraRecon dependencies..."
 
-echo "[*] Installing common recon tools (subfinder, httpx, gau, waybackurls, nuclei)..."
+# Install Go if not installed
+if ! command -v go &> /dev/null; then
+    echo "[!] Go not found. Installing..."
+    sudo apt update
+    sudo apt install -y golang
+fi
+
+# Update PATH for Go bin
+export PATH=$PATH:$(go env GOPATH)/bin
+
+# Install all required Go tools
+echo "[*] Installing Go tools..."
 go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 go install -v github.com/tomnomnom/assetfinder@latest
 go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
@@ -17,16 +21,18 @@ go install -v github.com/lc/gau/v2/cmd/gau@latest
 go install -v github.com/tomnomnom/waybackurls@latest
 go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
 go install -v github.com/hakluke/hakrawler@latest
-go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 go install github.com/haccer/subjack@latest
-go install github.com/tomnomnom/waybackurls@latest
 go install github.com/tomnomnom/gf@latest
 
-echo "[*] Cloning sqlmap (if you want sqlmap in PATH, add it manually or use pip)"
-if [[ ! -d sqlmap ]]; then
-  git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git
-  echo "[*] sqlmap cloned to ./sqlmap (run with python3 sqlmap/sqlmap.py)"
-fi
+# Install GF patterns
+echo "[*] Installing GF patterns..."
+mkdir -p ~/.gf
+git clone https://github.com/1ndianl33t/Gf-Patterns.git
+cp Gf-Patterns/*.json ~/.gf
+rm -rf Gf-Patterns
 
-echo "[*] Done. Make sure \$GOPATH/bin is in your PATH (e.g. export PATH=\$PATH:\$GOPATH/bin)"
-EOF
+# Final PATH update
+echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+source ~/.bashrc
+
+echo "[+] HydraRecon setup complete! You can now run ./hydra-recon.sh <domain>"
